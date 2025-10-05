@@ -18,8 +18,8 @@ final class Version20251005143737 extends AbstractMigration
     {
         $this->addSql(<<<SQL
             CREATE TABLE users (
-                id UUID NOT NULL,
-                roles JSON NOT NULL,
+                id       UUID NOT NULL,
+                roles    JSON NOT NULL,
                 password VARCHAR(255) NOT NULL,
 
                 PRIMARY KEY (id)

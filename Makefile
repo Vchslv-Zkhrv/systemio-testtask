@@ -12,3 +12,10 @@ cache:
 	$(CONSOLE) cache:clear
 list:
 	$(CONSOLE) list 
+
+list-migrations:
+	$(CONSOLE) doctrine:migrations:list
+migrate:
+	$(CONSOLE) doctrine:migrations:migrate
+migration:
+	$(CONSOLE) make:migration

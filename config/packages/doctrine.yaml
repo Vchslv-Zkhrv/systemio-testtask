@@ -8,6 +8,15 @@ doctrine:
         url: '%env(resolve:DATABASE_URL)%'
         server_version: '17'
         logging: true
+
+        types:
+            payment_system_enum: App\DBAL\Types\Enum\DbalPaymentSystemType
+            purchase_status_enum: App\DBAL\Types\Enum\DbalPurchaseStatusType
+            sale_type_enum: App\DBAL\Types\Enum\DbalSaleType
+        mapping_types:
+            payment_system_enum: string
+            purchase_status_enum: string
+            sale_type_enum: string
     orm:
         auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
