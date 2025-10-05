@@ -1,0 +1,57 @@
+services:
+
+    php:
+        hostname: php
+        container_name: php
+        build: docker/php
+        working_dir: /var/www/app
+        tty: true
+        volumes:
+            - ./:/var/www/app
+            - ./docker/php/z-overrides.ini:/usr/local/etc/php/conf.d/z-overrides.ini
+        depends_on:
+            - pgsql
+        networks:
+            - database_network
+            - web_network
+        env_file:
+            .env
+
+    pgsql:
+        hostname: pgsql
+        container_name: pgsql
+        image: postgres:17.6
+        restart: always
+        ports:
+            - "${PGSQL_EXTERNAL_PORT:-8338}:5432"
+        environment:
+            POSTGRES_DB: ${DATABASE_NAME}
+            POSTGRES_USER: ${DATABASE_USERNAME}
+            POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+        volumes:
+            - ./volumes/pgsql:/var/lib/postgresql/data
+        networks:
+            - database_network
+
+    nginx:
+        hostname: nginx
+        container_name: nginx
+        image: nginx:1.27
+        tty: true
+        volumes:
+            - ./docker/nginx:/etc/nginx/conf.d
+            - ./public:/var/www/app/public
+        ports:
+            - "${NGINX_EXTERNAL_PORT:-8377}:80"
+        depends_on:
+            - php
+        networks:
+            - web_network
+        env_file:
+            .env
+
+networks:
+    database_network:
+        driver: bridge
+    web_network:
+        driver: bridge
