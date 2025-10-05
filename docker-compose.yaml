@@ -23,7 +23,7 @@ services:
         image: postgres:17.6
         restart: always
         ports:
-            - "${PGSQL_EXTERNAL_PORT:-8338}:5432"
+            - "${PGSQL_EXTERNAL_PORT:-8378}:5432"
         environment:
             POSTGRES_DB: ${DATABASE_NAME}
             POSTGRES_USER: ${DATABASE_USERNAME}

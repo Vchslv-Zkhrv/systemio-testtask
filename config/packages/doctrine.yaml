@@ -14,8 +14,8 @@ doctrine:
         auto_mapping: true
 
         mappings:
-            App\Entities:
+            App\Entity:
                 is_bundle: false
                 type: attribute
-                dir: '%kernel.project_dir%/src/Entities/'
-                prefix: 'App\Entities'
+                dir: '%kernel.project_dir%/src/Entity/'
+                prefix: 'App\Entity'
