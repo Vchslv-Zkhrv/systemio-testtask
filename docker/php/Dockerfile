@@ -13,10 +13,15 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libsodium-dev
 
+#RUN apk add libpq postgresql-dev
+RUN docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql
+
 RUN docker-php-ext-install -j$(nproc) \
     pcntl \
     bcmath \
     pdo \
+    pdo_pgsql \
+    pgsql \
     gd \
     pgsql \
     opcache \
