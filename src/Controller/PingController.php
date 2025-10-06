@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class PingController extends AbstractController
 {
-    #[Route('/ping', name: 'app_ping', methods: [Request::METHOD_GET])]
+    #[Route('/ping', name: 'ping', methods: [Request::METHOD_GET])]
     public function __invoke(): JsonResponse
     {
         return $this->json(['status' => 'ok']);
