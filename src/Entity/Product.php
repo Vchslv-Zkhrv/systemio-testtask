@@ -11,27 +11,31 @@ use Doctrine\ORM\Mapping as ORM;
 class Product
 {
     #[ORM\Id]
-    #[ORM\Column('tax_number', length: 255, nullable: false)]
-    private string $taxNumber;
+    #[ORM\Column('article')]
+    private int $article;
 
     #[ORM\Column('name', length: 255, nullable: false)]
     private string $name;
 
-    #[ORM\ManyToOne(Country::class, inversedBy: 'products')]
-    #[ORM\JoinColumn('country_code', referencedColumnName: 'domain_zone', nullable: false, onDelete: 'RESTRICT')]
-    private Country $country;
+    /**
+     * price in EUR
+     */
+    #[ORM\Column]
+    private float $price;
+
+    #[ORM\Column]
+    private int $stock;
 
     public function __construct(
-        string $taxNumber,
+        int $article,
         string $name,
+        float $price,
+        int $stock = 0,
     ) {
-        $this->taxNumber = $taxNumber;
+        $this->article = $article;
         $this->name = $name;
-    }
-
-    public function getTaxNumber(): string
-    {
-        return $this->taxNumber;
+        $this->price = $price;
+        $this->stock = $stock;
     }
 
     public function getName(): string
@@ -42,7 +46,28 @@ class Product
     public function setName(string $name): static
     {
         $this->name = $name;
+        return $this;
+    }
 
+    public function getPrice(): float
+    {
+        return $this->price;
+    }
+
+    public function setPrice(float $price): static
+    {
+        $this->price = $price;
+        return $this;
+    }
+
+    public function getStock(): int
+    {
+        return $this->stock;
+    }
+
+    public function setStock(int $stock): static
+    {
+        $this->stock = $stock;
         return $this;
     }
 }

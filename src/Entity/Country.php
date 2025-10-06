@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\CountryRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
 
@@ -37,6 +38,12 @@ class Country
     #[ORM\OneToMany(Product::class, mappedBy: 'country')]
     private Collection $products;
 
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\OneToMany(targetEntity: User::class, mappedBy: 'country')]
+    private Collection $users;
+
     public function __construct(
         string $domainZone,
         string $taxCodePattern,
@@ -45,6 +52,7 @@ class Country
         $this->domainZone = $domainZone;
         $this->taxCodePattern = $taxCodePattern;
         $this->name = $name;
+        $this->users = new ArrayCollection();
     }
 
     public function getDomainZone(): string
@@ -71,6 +79,36 @@ class Country
     public function setName(string $name): static
     {
         $this->name = $name;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->setCountry($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            // set the owning side to null (unless already changed)
+            if ($user->getCountry() === $this) {
+                $user->setCountry(null);
+            }
+        }
+
         return $this;
     }
 }

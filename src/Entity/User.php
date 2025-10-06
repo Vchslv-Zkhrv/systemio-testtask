@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Exception\InvalidTaxCodeException;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -44,14 +45,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Coupon::class, mappedBy: 'receiver')]
     private Collection $coupons;
 
+    #[ORM\Column(length: 20, unique: true)]
+    private string $taxCode;
+
+    #[ORM\ManyToOne(Country::class, inversedBy: 'users')]
+    #[ORM\JoinColumn('country_code', referencedColumnName: 'domain_zone', nullable: false, onDelete: 'RESTRICT')]
+    private Country $country;
+
     /**
      * @param Uuid     $id
      * @param string   $password
+     * @param string   $taxCode
      * @param string[] $roles
      */
     public function __construct(
+        Country $country,
         Uuid $id,
         string $password,
+        string $taxCode,
         array $roles = ['ROLE_USER'],
     ) {
         $this->id = $id;
@@ -59,6 +70,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = $roles;
         $this->purchases = new ArrayCollection();
         $this->coupons = new ArrayCollection();
+
+        $this->setCountry($country, $taxCode);
     }
 
     public function getId(): Uuid
@@ -173,6 +186,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $coupon->setReceiver(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getTaxCode(): string
+    {
+        return $this->taxCode;
+    }
+
+    public function setTaxCode(string $taxCode): static
+    {
+        preg_match($this->country->getTaxCodePattern(), $taxCode, $matches);
+        if (empty($matches)) {
+            throw new InvalidTaxCodeException("Tax code must follow country-specific pattern");
+        }
+
+        $this->taxCode = $taxCode;
+        return $this;
+    }
+
+    public function getCountry(): Country
+    {
+        return $this->country;
+    }
+
+    public function setCountry(
+        Country $country,
+        string $taxCode,
+    ): static {
+        preg_match($country->getTaxCodePattern(), $taxCode, $matches);
+        if (empty($matches)) {
+            throw new InvalidTaxCodeException("Tax code must follow country-specific pattern");
+        }
+
+        $this->country = $country;
+        $this->taxCode = $taxCode;
 
         return $this;
     }
