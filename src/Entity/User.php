@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Exception\InvalidTaxCodeException;
 use App\Repository\UserRepository;
+use App\Facade\TaxFacade;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -16,6 +17,7 @@ use Symfony\Component\Uid\Uuid;
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     const ROLE_USER = 'ROLE_USER';
+    const ROLE_ADMIN = 'ROLE_ADMIN';
 
     #[ORM\Id]
     #[ORM\Column('id', type: 'uuid')]
@@ -45,24 +47,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Coupon::class, mappedBy: 'receiver')]
     private Collection $coupons;
 
-    #[ORM\Column(length: 20, unique: true)]
-    private string $taxCode;
+    #[ORM\Column(length: 20, unique: true, nullable: true)]
+    private ?string $taxCode = null;
 
     #[ORM\ManyToOne(Country::class, inversedBy: 'users')]
-    #[ORM\JoinColumn('country_code', referencedColumnName: 'domain_zone', nullable: false, onDelete: 'RESTRICT')]
-    private Country $country;
+    #[ORM\JoinColumn('country_code', referencedColumnName: 'domain_zone', nullable: true, onDelete: 'RESTRICT')]
+    private ?Country $country = null;
 
     /**
      * @param Uuid     $id
      * @param string   $password
-     * @param string   $taxCode
+     * @param ?Country $country
+     * @param ?string  $taxCode
      * @param string[] $roles
      */
     public function __construct(
-        Country $country,
         Uuid $id,
         string $password,
-        string $taxCode,
         array $roles = ['ROLE_USER'],
     ) {
         $this->id = $id;
@@ -70,8 +71,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->roles = $roles;
         $this->purchases = new ArrayCollection();
         $this->coupons = new ArrayCollection();
-
-        $this->setCountry($country, $taxCode);
     }
 
     public function getId(): Uuid
@@ -89,6 +88,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string)$this->id;
     }
 
+    public function addRole(string $role): static
+    {
+        $this->roles[] = $role;
+        return $this->setRoles($this->roles);
+    }
+
     /**
      * @see UserInterface
      */
@@ -102,8 +107,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function setRoles(array $roles): static
     {
-        $this->roles = $roles;
-        if (in_array(static::ROLE_USER, $this->roles)) {
+        $this->roles = array_unique($roles);
+        if (!in_array(static::ROLE_USER, $this->roles)) {
             $this->roles[] = static::ROLE_USER;
         }
 
@@ -190,33 +195,39 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getTaxCode(): string
+    public function getTaxCode(): ?string
     {
         return $this->taxCode;
     }
 
-    public function setTaxCode(string $taxCode): static
+    public function setTaxCode(?string $taxCode): static
     {
-        preg_match($this->country->getTaxCodePattern(), $taxCode, $matches);
-        if (empty($matches)) {
-            throw new InvalidTaxCodeException("Tax code must follow country-specific pattern");
+        if ($taxCode !== null && $this->country !== null) {
+            if (!TaxFacade::validateTaxCode($this->country, $taxCode)) {
+                throw new InvalidTaxCodeException("Tax code must follow country-specific pattern");
+            }
         }
 
         $this->taxCode = $taxCode;
         return $this;
     }
 
-    public function getCountry(): Country
+    public function getCountry(): ?Country
     {
         return $this->country;
+    }
+
+    public function nullCountry(): static
+    {
+        $this->country = null;
+        return $this;
     }
 
     public function setCountry(
         Country $country,
         string $taxCode,
     ): static {
-        preg_match($country->getTaxCodePattern(), $taxCode, $matches);
-        if (empty($matches)) {
+        if (!TaxFacade::validateTaxCode($country, $taxCode)) {
             throw new InvalidTaxCodeException("Tax code must follow country-specific pattern");
         }
 

@@ -4,6 +4,8 @@ namespace App\Enum;
 
 enum PurchaseStatusType: string
 {
+    case NOT_SET = 'not_set';
+
     /**
      * Purchased successfully
      */

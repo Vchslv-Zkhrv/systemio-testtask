@@ -7,7 +7,6 @@ use App\Repository\CountryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -16,7 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsCommand(
     name: 'app:auth:generate-token',
-    description: 'Generates & registers basic auth API token',
+    description: 'Generates & registers basic auth API token with ROLE_ADMIN role',
 )]
 class GenerateAuthTokenConsoleCommand extends Command
 {
@@ -28,23 +27,9 @@ class GenerateAuthTokenConsoleCommand extends Command
         parent::__construct();
     }
 
-    protected function configure(): void
-    {
-        $this->addArgument('countryCode', InputArgument::REQUIRED, 'Country domain zone code');
-        $this->addArgument('taxCode', InputArgument::REQUIRED, 'Tax code');
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
-        $countryCode = $input->getArgument('countryCode');
-        $country = $this->countryRepository->find($countryCode);
-        if ($country === null) {
-            $io->error("Cannot find '$countryCode' country");
-        }
-
-        $taxCode = $input->getArgument('taxCode');
 
         $password = (string)$io->askHidden("Input password");
         if (strlen($password) < 6) {
@@ -53,7 +38,8 @@ class GenerateAuthTokenConsoleCommand extends Command
         }
 
         $id = new UuidV7();
-        $user = new User($country, $id, '', $taxCode);
+        $user = new User($id, '');
+        $user->addRole(User::ROLE_ADMIN);
 
         $hashedPassword = $this->passwordHasher->hashPassword($user, $password);
         $user->setPassword($hashedPassword);
@@ -63,7 +49,7 @@ class GenerateAuthTokenConsoleCommand extends Command
 
         $token = base64_encode("$id:$password");
 
-        $io->success("New user registered: `$id`. The token is:");
+        $io->success("New admin registered: `$id`. The token is:");
         $io->text("Basic $token");
 
         return Command::SUCCESS;

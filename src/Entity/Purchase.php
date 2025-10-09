@@ -37,15 +37,26 @@ class Purchase
     #[ORM\OneToMany(targetEntity: Coupon::class, mappedBy: 'purchase')]
     private Collection $coupons;
 
+    #[ORM\ManyToOne(Product::class)]
+    #[ORM\JoinColumn('article', referencedColumnName: 'article', nullable: false, onDelete: 'RESTRICT')]
+    private Product $product;
+
+    #[ORM\Column('quantity')]
+    private int $quantity;
+
     public function __construct(
         Uuid $id,
         User $purchaser,
+        Product $product,
         PaymentSystemType $paymentSystem,
-        PurchaseStatusType $status,
+        PurchaseStatusType $status = PurchaseStatusType::NOT_SET,
+        int $quantity = 1,
         ?\DateTimeImmutable $createdAt = null,
     ) {
         $this->id = $id;
         $this->purchaser = $purchaser;
+        $this->product = $product;
+        $this->quantity = $quantity;
         $this->paymentSystem = $paymentSystem;
         $this->status = $status;
         $this->createdAt = $createdAt ?? new \DateTimeImmutable();
@@ -117,5 +128,25 @@ class Purchase
         }
 
         return $this;
+    }
+
+    public function getProduct(): Product
+    {
+        return $this->product;
+    }
+
+    public function getQuantity(): int
+    {
+        return $this->quantity;
+    }
+
+    /**
+     * Returns otal price before taxes and commissions
+     */
+    public function getGrossTotal(): float
+    {
+        $gross = $this->product->getPrice() * $this->quantity;
+
+        return $gross;
     }
 }

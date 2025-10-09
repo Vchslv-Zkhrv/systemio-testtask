@@ -11,6 +11,11 @@ use Doctrine\Common\Collections\Collection;
 #[ORM\Entity(repositoryClass: CountryRepository::class)]
 class Country
 {
+    const DOMAIN_ZONE_GERMANY = 'de';
+    const DOMAIN_ZONE_ITALY = 'it';
+    const DOMAIN_ZONE_GREECE = 'gr';
+    const DOMAIN_ZONE_FRANCE = 'fr';
+
     /**
      * Country domain zone
      *
@@ -19,12 +24,6 @@ class Country
     #[ORM\Id]
     #[ORM\Column('domain_zone', length: 2)]
     private string $domainZone;
-
-    /**
-     * Tax code pattern
-     */
-    #[ORM\Column('tax_code_pattern', length: 255, unique: true)]
-    private string $taxCodePattern;
 
     /**
      * Country name in english
@@ -50,7 +49,6 @@ class Country
         string $name,
     ) {
         $this->domainZone = $domainZone;
-        $this->taxCodePattern = $taxCodePattern;
         $this->name = $name;
         $this->users = new ArrayCollection();
     }
@@ -58,17 +56,6 @@ class Country
     public function getDomainZone(): string
     {
         return $this->domainZone;
-    }
-
-    public function getTaxCodePattern(): string
-    {
-        return $this->taxCodePattern;
-    }
-
-    public function setTaxCodePattern(string $taxCodePattern): static
-    {
-        $this->taxCodePattern = $taxCodePattern;
-        return $this;
     }
 
     public function getName(): string

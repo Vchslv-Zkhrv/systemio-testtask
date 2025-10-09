@@ -21,3 +21,6 @@ migration:
 	$(CONSOLE) make:migration
 fixtures:
 	$(CONSOLE) doctrine:fixtures:load
+
+install:
+	$(COMPOSER) install -o
