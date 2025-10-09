@@ -4,7 +4,7 @@ namespace App\Request;
 
 use Symfony\Component\HttpFoundation\Request;
 
-class BaseRequest extends Request
+class ApiRequest extends Request
 {
     public function getPreferredFormat(?string $default = 'html'): ?string
     {

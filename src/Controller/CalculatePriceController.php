@@ -3,11 +3,14 @@
 namespace App\Controller;
 
 use App\DTO\Http\Request\CalculatePrice\CalculatePriceRequest;
+use App\DTO\Http\Request\CalculatePrice\CalculatePriceResponse;
 use App\Entity\Purchase;
 use App\Enum\PaymentSystemType;
 use App\Exception\CouponException;
 use App\Facade\TaxFacade;
 use App\Repository\ProductRepository;
+use App\Response\ApiResponse;
+use App\Response\ErrorResponse;
 use App\Service\Coupon\CouponService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -33,18 +36,12 @@ final class CalculatePriceController extends AbstractController
     ): JsonResponse {
         $product = $this->productRepository->find($requestData->product);
         if ($product === null) {
-            return new JsonResponse(
-                [ 'ok' => false, 'message' => 'Invalid product' ],
-                status: Response::HTTP_BAD_REQUEST
-            );
+            return ErrorResponse::build('Invalid product');
         }
 
         $purchaser = $this->taxFacade->getUserByTaxCode($requestData->taxNumber);
         if ($purchaser === null) {
-            return new JsonResponse(
-                [ 'ok' => false, 'message' => 'Invalid taxNumber' ],
-                status: Response::HTTP_BAD_REQUEST
-            );
+            return ErrorResponse::build('Invalid taxNumber');
         }
 
         $purchase = new Purchase(
@@ -67,11 +64,7 @@ final class CalculatePriceController extends AbstractController
 
         $tax = $this->taxFacade->calculatePurchaseTax($purchase);
 
-        return new JsonResponse([
-            'ok' => true,
-            'data' => [
-                'tax' => $tax
-            ]
-        ]);
+        $responseData = new CalculatePriceResponse($tax);
+        return ApiResponse::build($responseData);
     }
 }
