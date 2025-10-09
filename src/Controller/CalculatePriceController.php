@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\DTO\Http\Request\CalculatePrice\CalculatePriceRequest;
-use App\DTO\Http\Request\CalculatePrice\CalculatePriceResponse;
+use App\DTO\Http\Response\CalculatePrice\CalculatePriceResponse;
 use App\Entity\Purchase;
 use App\Enum\PaymentSystemType;
 use App\Exception\CouponException;
@@ -63,8 +63,9 @@ final class CalculatePriceController extends AbstractController
         }
 
         $tax = $this->taxFacade->calculatePurchaseTax($purchase);
+        $price = $purchase->getGrossTotal() + $tax;
 
-        $responseData = new CalculatePriceResponse($tax);
+        $responseData = new CalculatePriceResponse($price);
         return ApiResponse::build($responseData);
     }
 }
