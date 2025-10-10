@@ -2,13 +2,29 @@
 
 Как развернуть проект:
 ```bash
-git clone git@github.com:Vchslv-Zkhrv/systemio-testtask.git zakharov  # клонируем репозиторий в папку 'zakharov'
-cd zakharov  # переходим в папку
-cp .env.example .env  # создаем .env
-docker compose build  # собираем образы
-make up  # поднимаем проект
-make migrate  # запускаем миграции
-make fixtures  # загружаем фикстуры
+# клонируем репозиторий в папку 'zakharov'
+git clone git@github.com:Vchslv-Zkhrv/systemio-testtask.git zakharov
+
+# переходим в папку
+cd zakharov
+
+# создаем .env
+cp .env.example .env
+
+# собираем образы
+docker compose build
+
+# поднимаем проект
+make up
+
+# устанавливаем зависимости
+make install
+
+# запускаем миграции
+make migrate
+
+# загружаем фикстуры
+make fixtures
 ```
 
 В ходе выполнения команды `make fixtures` будет выведен авторизационный токен с правами админа.
