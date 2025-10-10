@@ -15,7 +15,7 @@ trait TaxNumberRequestTrait
     public string $taxNumber;
 
     #[Assert\Callback]
-    public function validate(ExecutionContextInterface $context): void
+    public function validateTaxNumber(ExecutionContextInterface $context): void
     {
         if (isset($this->taxNumber)) {
             try {

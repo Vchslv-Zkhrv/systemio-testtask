@@ -38,6 +38,11 @@ class Product
         $this->stock = $stock;
     }
 
+    public function getArticle(): int
+    {
+        return $this->article;
+    }
+
     public function getName(): string
     {
         return $this->name;

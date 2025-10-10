@@ -68,7 +68,7 @@ class CouponService
         }
 
         if ($sale > $gross) {
-            return new CouponException("Cannot apply coupons: sale is bigger than price");
+            throw new CouponException("Cannot apply coupons: sale is bigger than price");
         }
 
         return $sale;

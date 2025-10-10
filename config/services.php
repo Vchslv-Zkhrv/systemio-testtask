@@ -2,8 +2,10 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use App\DependencyInjection\Collection\PaymentServiceCollection;
 use App\DependencyInjection\Collection\TaxServiceCollection;
 use App\Enum\PaymentSystemType;
+use App\Facade\PaymentFacade;
 use App\Facade\TaxFacade;
 use App\Service\Payment\PaymentService;
 use App\Service\Payment\PaypalPaymentService;
@@ -21,7 +23,7 @@ return static function (ContainerConfigurator $container): void {
     $defaults = $services->defaults();
 
     $defaults->autowire()->autoconfigure();
-    $defaults->bind('$paymentSystemType', $paymentSystem);
+    $defaults->bind('$defaultPaymentSystem', $paymentSystem);
 
     $services->instanceof(TaxService::class)->tag('app.tax_service');
     $services->set(GermanyTaxService::class)->args(['$vat' => '%env(GERMAN_VAT)%'])->autowire()->public();
@@ -30,6 +32,10 @@ return static function (ContainerConfigurator $container): void {
     $services->set(GreeceTaxService::class)->args(['$vat' => '%env(GREECE_VAT)%'])->autowire()->public();
     $services->set(TaxServiceCollection::class)->autowire()->public();
     $services->set(TaxFacade::class)->autowire()->public();
+
+    $services->instanceof(PaymentService::class)->tag('app.payment_service')->autowire(true)->public();
+    $services->set(PaymentServiceCollection::class)->autowire()->public();
+    $services->set(PaymentFacade::class)->autowire()->public();
 
     $services->load('App\\Command\\',      '../src/Command');
     $services->load('App\\Controller\\',   '../src/Controller');

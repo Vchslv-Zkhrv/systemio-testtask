@@ -9,8 +9,11 @@ use Systemeio\TestForCandidates\PaymentProcessor\StripePaymentProcessor;
 
 class StripePaymentService extends PaymentService
 {
-    public function __construct(protected StripePaymentProcessor $paymentProcessor)
+    protected StripePaymentProcessor $paymentProcessor;
+
+    public function __construct()
     {
+        $this->paymentProcessor = new StripePaymentProcessor();
     }
 
     public static function getPaymentSystem(): PaymentSystemType

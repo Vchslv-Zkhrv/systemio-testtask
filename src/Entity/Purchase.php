@@ -25,10 +25,10 @@ class Purchase
     #[ORM\Column('created_at')]
     private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column('payment_system', type: 'payment_system_enum', enumType: PaymentSystemType::class)]
+    #[ORM\Column('payment_system', enumType: PaymentSystemType::class)]
     private PaymentSystemType $paymentSystem;
 
-    #[ORM\Column('status', type: 'purchase_status_enum', enumType: PurchaseStatusType::class)]
+    #[ORM\Column('status', enumType: PurchaseStatusType::class)]
     private PurchaseStatusType $status;
 
     /**

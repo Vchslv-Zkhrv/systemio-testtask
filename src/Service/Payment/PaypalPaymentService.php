@@ -9,8 +9,11 @@ use Systemeio\TestForCandidates\PaymentProcessor\PaypalPaymentProcessor;
 
 class PaypalPaymentService extends PaymentService
 {
-    public function __construct(protected PaypalPaymentProcessor $paymentProcessor)
+    protected PaypalPaymentProcessor $paymentProcessor;
+
+    public function __construct()
     {
+        $this->paymentProcessor = new PaypalPaymentProcessor();
     }
 
     public static function getPaymentSystem(): PaymentSystemType
